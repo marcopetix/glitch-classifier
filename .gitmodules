@@ -1,0 +1,3 @@
+[submodule "external/GravitySpy"]
+	path = external/GravitySpy
+	url = git@github.com:Gravity-Spy/GravitySpy.git

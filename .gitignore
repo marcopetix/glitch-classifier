@@ -1,0 +1,5 @@
+# Ignore GravitySpy model artifacts
+external/GravitySpy/.git/
+external/GravitySpy/__pycache__/
+*.h5
+data/*
