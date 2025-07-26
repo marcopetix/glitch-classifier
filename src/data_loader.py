@@ -4,8 +4,15 @@ from PIL import Image
 from torch.utils.data import Dataset
 import torch
 import torchvision.transforms as transforms
-from gwpy.timeseries import TimeSeries
-from scipy.signal import spectrogram
+# from gwpy.timeseries import TimeSeries
+# from scipy.signal import spectrogram
+
+class CropSpectrogramPlot:
+    def __init__(self, crop_box=(100, 70, 720, 535)):
+        self.crop_box = crop_box  # (left, upper, right, lower)
+
+    def __call__(self, image):
+        return image.crop(self.crop_box)
 
 class NpySpectrogramDataset(Dataset):
     def __init__(self, root_dir, transform=None):

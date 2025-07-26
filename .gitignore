@@ -2,4 +2,15 @@
 external/GravitySpy/.git/
 external/GravitySpy/__pycache__/
 *.h5
+
+# Ignore data files
 data/*
+
+# Ignore logs and checkpoints
+models
+
+# Ignore wandb files
+wandb/
+
+# Ignore output files
+outputs/

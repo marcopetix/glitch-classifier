@@ -8,14 +8,15 @@ import torchvision.transforms as transforms
 # Ensure src/ is in the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from data_loader import NpySpectrogramDataset, PngSpectrogramDataset
+from data_loader import NpySpectrogramDataset, PngSpectrogramDataset, CropSpectrogramPlot
 from model import GravitySpyCNN
 
 
 def get_dataset(dataset_type, split, root):
     transform = transforms.Compose([
+        CropSpectrogramPlot(crop_box=(70, 50, 730, 570)) if dataset_type == "png" else lambda x: x,
         transforms.Resize((128, 128)),
-        transforms.ToTensor() if dataset_type == "png" else lambda x: x
+        transforms.ToTensor() if dataset_type == "png" else lambda x: x, 
     ])
 
     if dataset_type == "png":
