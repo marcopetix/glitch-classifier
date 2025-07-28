@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 # Ensure src/ is in the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from data_loader import NpySpectrogramDataset, PngSpectrogramDataset
-from model import GravitySpyCNN
+from src.data.data_loader import NpySpectrogramDataset, PngSpectrogramDataset
+from src.models.model import GravitySpyCNN
 
-from data_loader import CropSpectrogramPlot
+from src.data.data_loader import CropSpectrogramPlot
 
 def get_dataloader(dataset_type, split, root, batch_size):
     transform = transforms.Compose([
@@ -42,14 +42,17 @@ def plot_and_log_confusion_matrix(y_true, y_pred, class_names, output_dir, epoch
     disp.plot(xticks_rotation='vertical')
     plt.title(f"Confusion Matrix - Epoch {epoch}")
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/confusion_matrix_epoch_{epoch}.png")
+    plot_dir = os.path.join(output_dir, "confusion_matrices")
+    os.makedirs(plot_dir, exist_ok=True)
+    plot_path = os.path.join(plot_dir, f"confusion_matrix_epoch_{epoch}.png")
+    plt.savefig(plot_path)
     plt.close()
-
-    wandb.log({"confusion_matrix": wandb.Image(f"{output_dir}/confusion_matrix_epoch_{epoch}.png")})
+    wandb.log({"confusion_matrix": wandb.Image(plot_path)})
 
 
 def train(args):
-    wandb.init(project=args.project_name, config=vars(args), name=args.run_name)
+    run_name = args.run_name if args.run_name else f"{args.dataset_type}_training_{args.epochs}epochs"
+    wandb.init(project=args.project_name, config=vars(args), name=run_name)
 
     train_loader = get_dataloader(args.dataset_type, "train", args.root, args.batch_size)
     val_loader = get_dataloader(args.dataset_type, "val", args.root, args.batch_size)
@@ -114,12 +117,13 @@ def train(args):
         val_acc = val_correct / val_total
 
         # Save predictions and labels
-        np.save(f"{wandb.run.dir}/val_preds_epoch_{epoch+1}.npy", np.array(all_preds))
-        np.save(f"{wandb.run.dir}/val_labels_epoch_{epoch+1}.npy", np.array(all_labels))
+        pred_dir = os.path.join(wandb.run.dir, "predictions")
+        os.makedirs(pred_dir, exist_ok=True)
+        np.save(f"{pred_dir}/val_preds_epoch_{epoch+1}.npy", np.array(all_preds))
+        np.save(f"{pred_dir}/val_labels_epoch_{epoch+1}.npy", np.array(all_labels))
 
         # Confusion matrix
         plot_and_log_confusion_matrix(all_labels, all_preds, class_names, output_dir=wandb.run.dir, epoch=epoch+1)
-
 
         wandb.log({
             "epoch": epoch + 1,
